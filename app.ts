@@ -46,7 +46,7 @@ class Chain {
 }
 
 class Wallet {
-    public publciKey: string;
+    public publicKey: string;
     public privateKey: string;
 
     constructor() {
@@ -57,10 +57,15 @@ class Wallet {
         });
 
         this.privateKey = keypair.privateKey;
-        this.publciKey = keypair.publicKey;
+        this.publicKey = keypair.publicKey;
     }
 
     sendMoney(amount: number, payeePublicKey: string) {
-        
+        const transaction = new Transaction(amount, this.publicKey, payeePublicKey)
+
+        const sign = crypto.createSign('SHA256');
+        sign.update(transaction.toString()).end();
+
+        const signature = sign.sign(this.privateKey);
     }
 }
