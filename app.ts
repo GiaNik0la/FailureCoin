@@ -13,6 +13,8 @@ class Transaction {
 }
 
 class Block {
+    public nonce: number = Math.floor(Math.random() * 999999999);
+
     constructor(
         public prevHash: string,
         public transaction: Transaction,
@@ -39,9 +41,37 @@ class Chain {
     get lastBlock() {
         return this.chain[this.chain.length - 1];
     }
-    
-    addBlock(transaction: Transaction, senderPublicKey: string, signature: string) {
 
+    mine(nonce: number) {
+        let solution = 1;
+        console.log("mining failure coin...");
+
+        while(true) {
+            const hash = crypto.createHash('MD5');
+            hash.update((nonce + solution).toString()).end();
+
+            const attempt = hash.digest('hex');
+
+            if(attempt.substr(0,4) === '0000') {
+                console.log(`Solved! Solution is: ${solution}`)
+                return solution;
+            }
+
+            solution++;
+        }
+    }
+    
+    addBlock(transaction: Transaction, senderPublicKey: string, signature: Buffer) {
+        const verifier = crypto.createVerify('SHA256');
+        verifier.update(transaction.toString());
+
+        const isValid: boolean = verifier.verify(senderPublicKey, signature);
+
+        if(isValid) {
+            const newBlock = new Block(this.lastBlock.hash, transaction);
+            this.mine(newBlock.nonce);
+            this.chain.push(newBlock);
+        }
     }
 }
 
@@ -67,5 +97,10 @@ class Wallet {
         sign.update(transaction.toString()).end();
 
         const signature = sign.sign(this.privateKey);
+        Chain.instance.addBlock(transaction, this.publicKey, signature);
     }
 }
+
+const satoshi = new Wallet();
+const Jemala = new Wallet();
+const Giorgi = new Wallet();
