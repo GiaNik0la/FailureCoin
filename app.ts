@@ -3,8 +3,6 @@ class Transaction {
         payer: string,
         reciever: string,
         amount: number
-    ) {
-        
-        
-    }
+    ) { }
 }
+
