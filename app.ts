@@ -1,8 +1,66 @@
+import * as crypto from 'crypto';
+
 class Transaction {
     constructor(
-        payer: string,
-        reciever: string,
-        amount: number
+        public amount: number,
+        public payer: string,
+        public reciever: string
     ) { }
+
+    toString() {
+        return JSON.stringify(this);
+    }
 }
 
+class Block {
+    constructor(
+        public prevHash: string,
+        public transaction: Transaction,
+        public ts = Date.now()
+    ) { }
+
+    get hash() {
+        const str = JSON.stringify(this);
+        const hash = crypto.createHash('SHA256');
+        hash.update(str).end();
+        return hash.digest('hex');
+    }
+}
+
+class Chain {
+    public static instance = new Chain();
+
+    chain: Block[];
+
+    constructor() {
+        this.chain = [new Block(null, new Transaction(100, "genesis", "satoshi"))];
+    }
+
+    get lastBlock() {
+        return this.chain[this.chain.length - 1];
+    }
+    
+    addBlock(transaction: Transaction, senderPublicKey: string, signature: string) {
+
+    }
+}
+
+class Wallet {
+    public publciKey: string;
+    public privateKey: string;
+
+    constructor() {
+        const keypair = crypto.generateKeyPairSync('rsa', {
+            modulusLength: 2048,
+            publicKeyEncoding: { type: 'spki', format: 'pem' },
+            privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+        });
+
+        this.privateKey = keypair.privateKey;
+        this.publciKey = keypair.publicKey;
+    }
+
+    sendMoney(amount: number, payeePublicKey: string) {
+        
+    }
+}
